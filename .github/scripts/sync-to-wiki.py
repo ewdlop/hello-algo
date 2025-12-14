@@ -112,12 +112,13 @@ def convert_image_paths(text, source_file):
         
         if not github_repo:
             try:
-                # Try to get from git remote
+                # Try to get from git remote (with timeout to prevent hanging)
                 result = subprocess.run(
                     ['git', 'config', '--get', 'remote.origin.url'],
                     capture_output=True,
                     text=True,
-                    check=True
+                    check=True,
+                    timeout=5
                 )
                 remote_url = result.stdout.strip()
                 # Parse repository from URL
@@ -141,8 +142,8 @@ def convert_image_paths(text, source_file):
                 else:
                     print(f"Warning: Not a GitHub URL, cannot convert image {image_path}")
                     return match.group(0)
-            except:
-                print(f"Warning: Could not determine repository name for image {image_path}")
+            except (subprocess.CalledProcessError, subprocess.TimeoutExpired, Exception) as e:
+                print(f"Warning: Could not determine repository name for image {image_path}: {e}")
                 return match.group(0)
         
         # Convert relative path to absolute GitHub raw path
@@ -258,8 +259,8 @@ def create_sidebar(pages):
             with open(mkdocs_config, 'r', encoding='utf-8') as f:
                 config = yaml.safe_load(f)
                 site_name = config.get('site_name', 'Documentation')
-        except:
-            pass
+        except (yaml.YAMLError, IOError, Exception) as e:
+            print(f"Warning: Could not read site name from mkdocs.yml: {e}")
     
     sidebar_content = f"# 📚 {site_name} Wiki\n\n"
     sidebar_content += "## Table of Contents\n\n"
@@ -305,8 +306,8 @@ def create_home_page():
                     config = yaml.safe_load(f)
                     site_name = config.get('site_name', 'Documentation')
                     site_description = config.get('site_description', '')
-            except:
-                pass
+            except (yaml.YAMLError, IOError, Exception) as e:
+                print(f"Warning: Could not read config from mkdocs.yml: {e}")
         
         home_content = f"# {site_name}\n\n"
         if site_description:
