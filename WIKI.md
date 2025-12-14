@@ -51,9 +51,9 @@ Once enabled, the wiki can be accessed at:
 https://github.com/<username>/<repository>/wiki
 ```
 
-For this repository:
+Example (update with your actual repository):
 ```
-https://github.com/ewdlop/hello-algo/wiki
+https://github.com/username/repository-name/wiki
 ```
 
 ## Features

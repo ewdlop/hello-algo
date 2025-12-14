@@ -76,25 +76,27 @@ def convert_image_paths(text, source_file):
         
         # Get repository name from environment or git config
         import subprocess
-        try:
-            # Try to get from git remote
-            result = subprocess.run(
-                ['git', 'config', '--get', 'remote.origin.url'],
-                capture_output=True,
-                text=True,
-                check=True
-            )
-            remote_url = result.stdout.strip()
-            # Parse repository from URL
-            # e.g., https://github.com/user/repo.git or git@github.com:user/repo.git
-            if 'github.com' in remote_url:
-                repo_part = remote_url.split('github.com')[-1]
-                repo_part = repo_part.strip('/:').replace('.git', '')
-                github_repo = repo_part
-            else:
-                github_repo = os.environ.get('GITHUB_REPOSITORY', 'ewdlop/hello-algo')
-        except:
-            github_repo = os.environ.get('GITHUB_REPOSITORY', 'ewdlop/hello-algo')
+        github_repo = os.environ.get('GITHUB_REPOSITORY')
+        
+        if not github_repo:
+            try:
+                # Try to get from git remote
+                result = subprocess.run(
+                    ['git', 'config', '--get', 'remote.origin.url'],
+                    capture_output=True,
+                    text=True,
+                    check=True
+                )
+                remote_url = result.stdout.strip()
+                # Parse repository from URL
+                # e.g., https://github.com/user/repo.git or git@github.com:user/repo.git
+                if 'github.com' in remote_url:
+                    repo_part = remote_url.split('github.com')[-1]
+                    repo_part = repo_part.strip('/:').replace('.git', '')
+                    github_repo = repo_part
+            except:
+                print(f"Warning: Could not determine repository name for image {image_path}")
+                return match.group(0)
         
         # Convert relative path to absolute GitHub raw path
         try:
@@ -201,9 +203,19 @@ def create_sidebar(pages):
     """
     Create a _Sidebar.md file for the wiki navigation.
     """
-    sidebar_content = "# 📚 Hello 算法 Wiki\n\n"
-    sidebar_content += "欢迎来到 Hello 算法的 GitHub Wiki！\n\n"
-    sidebar_content += "## 目录\n\n"
+    # Try to get site name from mkdocs.yml
+    site_name = "Documentation"
+    mkdocs_config = Path("mkdocs.yml")
+    if mkdocs_config.exists():
+        try:
+            with open(mkdocs_config, 'r', encoding='utf-8') as f:
+                config = yaml.safe_load(f)
+                site_name = config.get('site_name', 'Documentation')
+        except:
+            pass
+    
+    sidebar_content = f"# 📚 {site_name} Wiki\n\n"
+    sidebar_content += "## Table of Contents\n\n"
     
     for title, wiki_name in pages:
         if wiki_name and title:  # Skip empty entries
@@ -223,18 +235,36 @@ def create_home_page():
     readme_path = Path("README.md")
     docs_index = DOCS_DIR / "index.md"
     
-    home_content = "# Hello 算法\n\n"
-    home_content += "动画图解、一键运行的数据结构与算法教程。\n\n"
+    home_content = ""
     
     if docs_index.exists():
         with open(docs_index, 'r', encoding='utf-8') as f:
             content = f.read()
             # Remove front matter
             content = re.sub(r'^---\s*\n.*?\n---\s*\n', '', content, flags=re.DOTALL)
-            home_content += content
+            home_content = content
     elif readme_path.exists():
         with open(readme_path, 'r', encoding='utf-8') as f:
-            home_content += f.read()
+            home_content = f.read()
+    else:
+        # Fallback: create a basic home page using site info from mkdocs.yml
+        mkdocs_config = Path("mkdocs.yml")
+        site_name = "Documentation"
+        site_description = ""
+        
+        if mkdocs_config.exists():
+            try:
+                with open(mkdocs_config, 'r', encoding='utf-8') as f:
+                    config = yaml.safe_load(f)
+                    site_name = config.get('site_name', 'Documentation')
+                    site_description = config.get('site_description', '')
+            except:
+                pass
+        
+        home_content = f"# {site_name}\n\n"
+        if site_description:
+            home_content += f"{site_description}\n\n"
+        home_content += "Welcome to the wiki!\n"
     
     # Convert links for wiki
     home_content = convert_mkdocs_to_wiki_link(home_content)
