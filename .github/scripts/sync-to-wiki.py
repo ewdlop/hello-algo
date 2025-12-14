@@ -41,6 +41,11 @@ def get_docs_directory():
     
     return docs_dir
 
+# Constants for URL parsing
+GITHUB_HTTPS_PREFIX = 'https://github.com/'
+GITHUB_HTTP_PREFIX = 'http://github.com/'
+GITHUB_GIT_PREFIX = 'git@github.com:'
+
 # Directories
 DOCS_DIR = Path(get_docs_directory())
 WIKI_DIR = Path("wiki")
@@ -126,15 +131,15 @@ def convert_image_paths(text, source_file):
                 # Check if this is a GitHub URL using more secure pattern matching
                 repo_part = None
                 
-                if remote_url.startswith('https://github.com/'):
+                if remote_url.startswith(GITHUB_HTTPS_PREFIX):
                     # Extract after https://github.com/
-                    repo_part = remote_url[len('https://github.com/'):]
-                elif remote_url.startswith('http://github.com/'):
+                    repo_part = remote_url[len(GITHUB_HTTPS_PREFIX):]
+                elif remote_url.startswith(GITHUB_HTTP_PREFIX):
                     # Extract after http://github.com/
-                    repo_part = remote_url[len('http://github.com/'):]
-                elif remote_url.startswith('git@github.com:'):
+                    repo_part = remote_url[len(GITHUB_HTTP_PREFIX):]
+                elif remote_url.startswith(GITHUB_GIT_PREFIX):
                     # Extract after git@github.com:
-                    repo_part = remote_url[len('git@github.com:'):]
+                    repo_part = remote_url[len(GITHUB_GIT_PREFIX):]
                 
                 if repo_part:
                     repo_part = repo_part.strip('/').replace('.git', '')
@@ -259,7 +264,7 @@ def create_sidebar(pages):
             with open(mkdocs_config, 'r', encoding='utf-8') as f:
                 config = yaml.safe_load(f)
                 site_name = config.get('site_name', 'Documentation')
-        except (yaml.YAMLError, IOError, Exception) as e:
+        except (yaml.YAMLError, IOError) as e:
             print(f"Warning: Could not read site name from mkdocs.yml: {e}")
     
     sidebar_content = f"# 📚 {site_name} Wiki\n\n"
@@ -306,7 +311,7 @@ def create_home_page():
                     config = yaml.safe_load(f)
                     site_name = config.get('site_name', 'Documentation')
                     site_description = config.get('site_description', '')
-            except (yaml.YAMLError, IOError, Exception) as e:
+            except (yaml.YAMLError, IOError) as e:
                 print(f"Warning: Could not read config from mkdocs.yml: {e}")
         
         home_content = f"# {site_name}\n\n"
