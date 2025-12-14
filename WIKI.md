@@ -68,7 +68,7 @@ Internal documentation links are automatically converted:
 
 Images are converted to use GitHub's raw content URLs:
 - Before: `![Image](../assets/image.png)`
-- After: `![Image](https://raw.githubusercontent.com/<user>/<repo>/main/docs/assets/image.png)`
+- After: `![Image](https://raw.githubusercontent.com/ewdlop/hello-algo/main/docs/assets/image.png)`
 
 ### Navigation Sidebar
 
