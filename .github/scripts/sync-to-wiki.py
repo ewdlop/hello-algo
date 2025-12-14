@@ -36,7 +36,7 @@ def get_docs_directory():
                 elif Path('docs').exists():
                     docs_dir = 'docs'
                     print(f"Note: mkdocs.yml specifies '{configured_dir}' but using 'docs' as source")
-        except Exception as e:
+        except (yaml.YAMLError, IOError, OSError) as e:
             print(f"Warning: Could not read mkdocs.yml: {e}, using default 'docs' directory")
     
     return docs_dir
@@ -147,7 +147,7 @@ def convert_image_paths(text, source_file):
                 else:
                     print(f"Warning: Not a GitHub URL, cannot convert image {image_path}")
                     return match.group(0)
-            except (subprocess.CalledProcessError, subprocess.TimeoutExpired, Exception) as e:
+            except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
                 print(f"Warning: Could not determine repository name for image {image_path}: {e}")
                 return match.group(0)
         
@@ -166,7 +166,7 @@ def convert_image_paths(text, source_file):
             
             # Create GitHub raw URL
             wiki_image_path = f"https://raw.githubusercontent.com/{github_repo}/main/{image_rel_path_str}"
-        except Exception as e:
+        except (ValueError, OSError, AttributeError) as e:
             print(f"Warning: Could not convert image path {image_path} from {source_file}: {e}")
             # Return original if conversion fails
             return match.group(0)
