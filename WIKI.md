@@ -51,9 +51,9 @@ Once enabled, the wiki can be accessed at:
 https://github.com/<username>/<repository>/wiki
 ```
 
-Example (update with your actual repository):
+For this repository:
 ```
-https://github.com/username/repository-name/wiki
+https://github.com/ewdlop/hello-algo/wiki
 ```
 
 ## Features
@@ -68,7 +68,7 @@ Internal documentation links are automatically converted:
 
 Images are converted to use GitHub's raw content URLs:
 - Before: `![Image](../assets/image.png)`
-- After: `![Image](https://raw.githubusercontent.com/<user>/<repo>/main/docs/assets/image.png)`
+- After: `![Image](https://raw.githubusercontent.com/ewdlop/hello-algo/main/docs/assets/image.png)`
 
 ### Navigation Sidebar
 
